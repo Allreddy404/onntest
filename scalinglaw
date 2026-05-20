@@ -186,7 +186,7 @@ def fig_step1_bandwidth_scaling(dev=DEV_DISPLAY, save=True):
              lbl=r'$\rho=1$,  $P_{\max}=10\,\mathrm{mW}$'),
     ]
 
-    fig, (ax_l, ax_r) = plt.subplots(1, 2, figsize=(9.5, 4.0))
+    fig, (ax_l, ax_r) = plt.subplots(1, 2, figsize=(10.0, 4.0))
 
     # ─── Left panel: total σ² for four scenarios ───
     for sc in scenarios_L:
@@ -280,7 +280,7 @@ def fig_step2_power_sweep(dev=DEV_DISPLAY, save=True):
     P_th_sh_0,  P_sh_comp_0  = crossover_powers(0.0, eta0, dev)
     P_th_sh_1,  P_sh_comp_1  = crossover_powers(1.0, eta0, dev)
 
-    fig, (ax_l, ax_r) = plt.subplots(1, 2, figsize=(12.0, 4.4))
+    fig, (ax_l, ax_r) = plt.subplots(1, 2, figsize=(10.0, 4.4))
 
     # ─── Left panel: σ² vs P_max ───
     for rho, col, lbl in [(0.0, BLUE, r'$\rho=0$ (independent sources)'),
@@ -388,9 +388,9 @@ def fig_step2_power_sweep(dev=DEV_DISPLAY, save=True):
         frac_eta_r1.append(Ce*eta0 / tot)
         frac_coh_r1.append(Cc / tot)
 
-    # Create bar positions: 3 groups for ρ=0, 3 groups for ρ=1 with separator
-    x_rho0 = np.arange(3)
-    x_rho1 = np.arange(3) + 4  # offset by 4, creating gap at 3-3.5
+    # Create bar positions: 3 for ρ=0, 1.5 gap, 3 for ρ=1
+    x_rho0 = np.array([0, 1, 2])
+    x_rho1 = np.array([3.5, 4.5, 5.5])  # gap at 3
     x_all = np.concatenate([x_rho0, x_rho1])
 
     # Prepare data arrays for stacking
@@ -406,9 +406,9 @@ def fig_step2_power_sweep(dev=DEV_DISPLAY, save=True):
 
     for vals_r0, vals_r1, col, lbl in budget_items:
         ax_r.bar(x_rho0, vals_r0, bottom=btm_r0, color=col, label=lbl,
-                 edgecolor='white', linewidth=0.6, width=0.5, alpha=0.9)
+                 edgecolor='white', linewidth=0.6, width=0.6, alpha=0.9)
         ax_r.bar(x_rho1, vals_r1, bottom=btm_r1, color=col,
-                 edgecolor='white', linewidth=0.6, width=0.5, alpha=0.6)
+                 edgecolor='white', linewidth=0.6, width=0.6, alpha=0.6)
         btm_r0 += vals_r0
         btm_r1 += vals_r1
 
@@ -424,7 +424,6 @@ def fig_step2_power_sweep(dev=DEV_DISPLAY, save=True):
             p_str = f'{P_mW_val:.3f} mW'
         xticklabels.append(f'{lbl}\n({p_str})')
     
-    # Gap for x=3 (no label)
     # Labels for ρ=1
     for i, (P, lbl) in enumerate(zip(P_ops_W_rho1, labels_op)):
         P_mW_val = P * 1e3
@@ -434,31 +433,29 @@ def fig_step2_power_sweep(dev=DEV_DISPLAY, save=True):
             p_str = f'{P_mW_val:.3f} mW'
         xticklabels.append(f'{lbl}\n({p_str})')
 
-    # Set ticks and labels (skip x=3)
-    ax_r.set_xticks(np.concatenate([x_rho0, x_rho1]))
+    # Set ticks and labels
+    ax_r.set_xticks(x_all)
     ax_r.set_xticklabels(xticklabels, fontsize=7.0)
-
-    # Add group labels for ρ=0 and ρ=1 in figure coordinates
-    ax_r.text(1.0, -0.36, r'$\rho=0$ (independent)', 
-              transform=ax_r.transAxes, ha='center', fontsize=9, 
-              fontweight='bold', color=BLUE)
-    ax_r.text(0.65, -0.36, r'$\rho=1$ (shared)', 
-              transform=ax_r.transAxes, ha='center', fontsize=9, 
-              fontweight='bold', color=RED)
 
     ax_r.yaxis.set_major_formatter(
         mticker.FuncFormatter(lambda v, _: f'{v*100:.0f}%'))
     ax_r.set_ylabel(r'Fraction of total $\sigma^2_{\rm norm}$')
     ax_r.set_title(r'(b) Noise budget: $\rho$-dependence ($B=1\,\mathrm{GHz}$)')
     ax_r.set_ylim(0, 1.15)
-    ax_r.set_xlim(-0.5, 7.5)
+    ax_r.set_xlim(-0.7, 6.2)
     ax_r.legend(loc='upper right', fontsize=7.2)
     ax_r.grid(True, axis='y', ls=':', alpha=0.40)
 
     # Add a visual separator line between ρ=0 and ρ=1 sections
-    ax_r.axvline(3.5, color='0.7', lw=1.2, ls='--', alpha=0.6)
+    ax_r.axvline(2.75, color='0.7', lw=1.2, ls='--', alpha=0.6)
 
-    fig.tight_layout(pad=1.5, w_pad=2.5)
+    # Add text annotations below the figure (outside axis)
+    fig.text(0.27, 0.02, r'$\rho=0$ (independent sources)', 
+             ha='center', fontsize=8.5, color=BLUE, fontweight='bold')
+    fig.text(0.73, 0.02, r'$\rho=1$ (shared source)', 
+             ha='center', fontsize=8.5, color=RED, fontweight='bold')
+
+    fig.tight_layout(rect=[0, 0.05, 1, 1])
     if save:
         outpath1 = os.path.join(OUTPUT_DIR, "fig_step2_power_sweep.pdf")
         outpath2 = os.path.join(OUTPUT_DIR, "fig_step2_power_sweep.png")
