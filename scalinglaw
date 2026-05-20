@@ -15,8 +15,8 @@ three-step narrative flow:
           background-noise dominated (slope −2) → shot-noise dominated
           (slope −1) → computation-noise limited (slope 0, saturated).
           Left panel: full sweep with regime annotations.
-          Right panel: noise budget pie / stacked bar at three
-          representative operating points.
+          Right panel: noise budget comparison at three operating points,
+          for both ρ=0 and ρ=1.
 
   Step 3  fig_step3_averaging()
           In the computation-limited (saturated) regime, precision
@@ -43,13 +43,13 @@ OUTPUT_DIR = os.path.join(BASE_DIR, "FIG_datda")
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-# ═══════════════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════════[...]
 #  Physical constants
-# ═══════════════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════════[...]
 q   = 1.602e-19   # C
 kB  = 1.381e-23   # J/K
 
-# ═══════════════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════════[...]
 #  Device parameter sets
 #
 #  DEV_DISPLAY : chosen so all three regimes are clearly visible
@@ -60,7 +60,7 @@ kB  = 1.381e-23   # J/K
 #  DEV_HSPD   : high-speed scenario (R_L = 50 Ω) where thermal is
 #                large; shot-noise regime is compressed.  Used for
 #                comparison curve in Step 2 and for Step 3 (η,ρ sweep).
-# ═══════════════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════════[...]
 
 def make_dev(RIN_dBc=-150, ERIN_dBc=-150, R_resp=0.95,
              R_L=200.0, I_d=30e-9, T=300.0):
@@ -76,9 +76,9 @@ def make_dev(RIN_dBc=-150, ERIN_dBc=-150, R_resp=0.95,
 DEV_DISPLAY = make_dev(R_L=200.0)   # all three regimes visible
 DEV_HSPD    = make_dev(R_L=50.0)    # high-speed TIA
 
-# ═══════════════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════════[...]
 #  Core model
-# ═══════════════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════════[...]
 
 def coeffs(rho, P_max, dev):
     """Return (C_eta, C_coh, C_shot, C_bg) in Hz⁻¹."""
@@ -109,9 +109,9 @@ def crossover_powers(rho, eta, dev):
     P_sh_comp = 2.0 * q / (R * C_comp)
     return P_th_sh, P_sh_comp
 
-# ═══════════════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════════[...]
 #  Global plot style
-# ═══════════════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════════[...]
 
 plt.rcParams.update({
     'font.family'         : 'serif',
@@ -157,9 +157,9 @@ N_COLORS = [CYAN, BLUE, PURPLE, RED]
 RHO_COLORS = [BLUE, ORANGE, BROWN, RED]
 
 
-# ═══════════════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════════[...]
 #  STEP 1 — Universal B-linear scaling
-# ═══════════════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════════[...]
 
 def fig_step1_bandwidth_scaling(dev=DEV_DISPLAY, save=True):
     """
@@ -244,9 +244,6 @@ def fig_step1_bandwidth_scaling(dev=DEV_DISPLAY, save=True):
     ax_r.grid(True, which='major', ls=':', alpha=0.40)
     ax_r.grid(True, which='minor', ls=':', alpha=0.15)
 
-    #fig.suptitle(r'Step 1 — $\sigma^2_{\rm norm}\propto B$: '
-    #             r'bandwidth is the universal precision cost',
-    #             fontsize=10.5, y=1.01)
     fig.tight_layout(pad=1.5, w_pad=2.5)
     if save:
         outpath1 = os.path.join(OUTPUT_DIR, "fig_step1_bandwidth.pdf")
@@ -257,9 +254,9 @@ def fig_step1_bandwidth_scaling(dev=DEV_DISPLAY, save=True):
     return fig
 
 
-# ═══════════════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════════[...]
 #  STEP 2 — P_max sweep: three regime transitions
-# ═══════════════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════════[...]
 
 def fig_step2_power_sweep(dev=DEV_DISPLAY, save=True):
     """
@@ -272,7 +269,8 @@ def fig_step2_power_sweep(dev=DEV_DISPLAY, save=True):
                  are marked by dashed vertical lines.
 
     Right panel: Stacked noise-budget bars at three operating points
-                 (one per regime), showing which mechanism dominates.
+                 (one per regime), showing comparison between ρ=0 and ρ=1.
+                 Total 6 columns: 3 for ρ=0, 3 for ρ=1.
     """
     B0   = 1e9       # 1 GHz reference
     eta0 = 0.20
@@ -282,7 +280,7 @@ def fig_step2_power_sweep(dev=DEV_DISPLAY, save=True):
     P_th_sh_0,  P_sh_comp_0  = crossover_powers(0.0, eta0, dev)
     P_th_sh_1,  P_sh_comp_1  = crossover_powers(1.0, eta0, dev)
 
-    fig, (ax_l, ax_r) = plt.subplots(1, 2, figsize=(10.0, 4.4))
+    fig, (ax_l, ax_r) = plt.subplots(1, 2, figsize=(12.0, 4.4))
 
     # ─── Left panel: σ² vs P_max ───
     for rho, col, lbl in [(0.0, BLUE, r'$\rho=0$ (independent sources)'),
@@ -341,18 +339,6 @@ def fig_step2_power_sweep(dev=DEV_DISPLAY, save=True):
     ax_l.text(3.0, 2e-8, r'slope $= 0$' + '\n' + r'(saturated)',
               fontsize=8, color=PURPLE, ha='center')
 
-    # Regime text labels
-    """
-    label_y = yhi * 0.15
-    for xc, txt in [
-        (0.025,  'Thermal\nnoise\nlimited'),
-        (0.25,   'Shot\nnoise\nlimited'),
-        (3.5,    'Computation\nnoise\nlimited'),
-    ]:
-        ax_l.text(xc, label_y, txt, fontsize=7.5, ha='center',
-                  va='top', color='0.35', style='italic')
-    """
-
     ax_l.set_xlabel(r'Full-scale optical power $P_{\max}$ (mW)')
     ax_l.set_ylabel(r'$\sigma^2_{\rm norm}$ at $B = 1\,\mathrm{GHz}$')
     ax_l.set_title(r'(a) Precision vs $P_{\max}$: three noise-dominated regimes')
@@ -360,73 +346,118 @@ def fig_step2_power_sweep(dev=DEV_DISPLAY, save=True):
     ax_l.legend(loc='lower left', fontsize=7.2, ncol=1)
     ax_l.grid(True, which='major', ls=':', alpha=0.40)
     ax_l.grid(True, which='minor', ls=':', alpha=0.15)
-    """"""
+
     # ─── Right panel: noise budget at three operating points ───
-    # Pick one representative power per regime
-    P_ops_W = np.array([
+    # Compute for ρ=0: three representative powers
+    P_ops_W_rho0 = np.array([
         P_th_sh_0  / 6.0,              # deep thermal regime
         (P_th_sh_0 * P_sh_comp_0)**0.5, # geometric mean → shot regime
         P_sh_comp_0 * 6.0,              # deep computation regime
     ])
+    
+    # Compute for ρ=1: three representative powers based on ρ=1 crossovers
+    P_ops_W_rho1 = np.array([
+        P_th_sh_1  / 6.0,              # deep thermal regime
+        (P_th_sh_1 * P_sh_comp_1)**0.5, # geometric mean → shot regime
+        P_sh_comp_1 * 6.0,              # deep computation regime
+    ])
+
     labels_op = [
-        r'$P_1$ (thermal)',
-        r'$P_2$ (shot)',
-        r'$P_3$ (computation)',
+        r'Thermal',
+        r'Shot',
+        r'Computation',
     ]
 
-    frac_bg, frac_shot, frac_eta, frac_coh = [], [], [], []
-    for P in P_ops_W:
+    # Compute noise fractions for ρ=0
+    frac_bg_r0, frac_shot_r0, frac_eta_r0, frac_coh_r0 = [], [], [], []
+    for P in P_ops_W_rho0:
         Ce, Cc, Cs, Cb = coeffs(0.0, P, dev)
         tot = (Ce*eta0 + Cc + Cs + Cb)
-        frac_bg.append(Cb / tot)
-        frac_shot.append(Cs / tot)
-        frac_eta.append(Ce*eta0 / tot)
-        frac_coh.append(Cc / tot)
+        frac_bg_r0.append(Cb / tot)
+        frac_shot_r0.append(Cs / tot)
+        frac_eta_r0.append(Ce*eta0 / tot)
+        frac_coh_r0.append(Cc / tot)
 
-    x = np.arange(3)
-    btm = np.zeros(3)
+    # Compute noise fractions for ρ=1
+    frac_bg_r1, frac_shot_r1, frac_eta_r1, frac_coh_r1 = [], [], [], []
+    for P in P_ops_W_rho1:
+        Ce, Cc, Cs, Cb = coeffs(1.0, P, dev)
+        tot = (Ce*eta0 + Cc + Cs + Cb)
+        frac_bg_r1.append(Cb / tot)
+        frac_shot_r1.append(Cs / tot)
+        frac_eta_r1.append(Ce*eta0 / tot)
+        frac_coh_r1.append(Cc / tot)
+
+    # Create bar positions: 3 groups for ρ=0, 3 groups for ρ=1 with separator
+    x_rho0 = np.arange(3)
+    x_rho1 = np.arange(3) + 4  # offset by 4, creating gap at 3-3.5
+    x_all = np.concatenate([x_rho0, x_rho1])
+
+    # Prepare data arrays for stacking
+    btm_r0 = np.zeros(3)
+    btm_r1 = np.zeros(3)
+
     budget_items = [
-        (np.array(frac_bg),   GRAY,   r'$C_{\rm bg}\cdot B$ (thermal)'),
-        (np.array(frac_shot), GREEN,  r'$C_{\rm shot}\cdot B$ (shot)'),
-        (np.array(frac_eta),  PURPLE, r'$C_\eta\eta\cdot B$ (computation)'),
-        (np.array(frac_coh),  RED,    r'$C_{\rm coh}\cdot B$ (coherent)'),
+        (np.array(frac_bg_r0),   np.array(frac_bg_r1),   GRAY,   r'$C_{\rm bg}\cdot B$ (thermal)'),
+        (np.array(frac_shot_r0), np.array(frac_shot_r1), GREEN,  r'$C_{\rm shot}\cdot B$ (shot)'),
+        (np.array(frac_eta_r0),  np.array(frac_eta_r1),  PURPLE, r'$C_\eta\eta\cdot B$ (computation)'),
+        (np.array(frac_coh_r0),  np.array(frac_coh_r1),  RED,    r'$C_{\rm coh}\cdot B$ (coherent)'),
     ]
-    for vals, col, lbl in budget_items:
-        ax_r.bar(x, vals, bottom=btm, color=col, label=lbl,
-                 edgecolor='white', linewidth=0.6, width=0.5)
-        btm += vals
 
-    # Power labels below x-axis
-    ax_r.set_xticks(x)
+    for vals_r0, vals_r1, col, lbl in budget_items:
+        ax_r.bar(x_rho0, vals_r0, bottom=btm_r0, color=col, label=lbl,
+                 edgecolor='white', linewidth=0.6, width=0.5, alpha=0.9)
+        ax_r.bar(x_rho1, vals_r1, bottom=btm_r1, color=col,
+                 edgecolor='white', linewidth=0.6, width=0.5, alpha=0.6)
+        btm_r0 += vals_r0
+        btm_r1 += vals_r1
+
+    # X-axis labels
     xticklabels = []
-    for i, (P, lbl) in enumerate(zip(P_ops_W, labels_op)):
+    
+    # Labels for ρ=0
+    for i, (P, lbl) in enumerate(zip(P_ops_W_rho0, labels_op)):
         P_mW_val = P * 1e3
         if P_mW_val < 0.01:
             p_str = f'{P_mW_val*1e3:.1f} μW'
         else:
             p_str = f'{P_mW_val:.3f} mW'
         xticklabels.append(f'{lbl}\n({p_str})')
-    ax_r.set_xticklabels(xticklabels, fontsize=7.5)
+    
+    # Gap for x=3 (no label)
+    # Labels for ρ=1
+    for i, (P, lbl) in enumerate(zip(P_ops_W_rho1, labels_op)):
+        P_mW_val = P * 1e3
+        if P_mW_val < 0.01:
+            p_str = f'{P_mW_val*1e3:.1f} μW'
+        else:
+            p_str = f'{P_mW_val:.3f} mW'
+        xticklabels.append(f'{lbl}\n({p_str})')
+
+    # Set ticks and labels (skip x=3)
+    ax_r.set_xticks(np.concatenate([x_rho0, x_rho1]))
+    ax_r.set_xticklabels(xticklabels, fontsize=7.0)
+
+    # Add group labels for ρ=0 and ρ=1 in figure coordinates
+    ax_r.text(1.0, -0.36, r'$\rho=0$ (independent)', 
+              transform=ax_r.transAxes, ha='center', fontsize=9, 
+              fontweight='bold', color=BLUE)
+    ax_r.text(0.65, -0.36, r'$\rho=1$ (shared)', 
+              transform=ax_r.transAxes, ha='center', fontsize=9, 
+              fontweight='bold', color=RED)
 
     ax_r.yaxis.set_major_formatter(
         mticker.FuncFormatter(lambda v, _: f'{v*100:.0f}%'))
     ax_r.set_ylabel(r'Fraction of total $\sigma^2_{\rm norm}$')
-    ax_r.set_title(r'(b) Noise budget breakdown ($\rho=0$, $B=1\,\mathrm{GHz}$)')
-    ax_r.set_ylim(0, 1.05)
-    ax_r.legend(loc='upper right', fontsize=7.5)
+    ax_r.set_title(r'(b) Noise budget: $\rho$-dependence ($B=1\,\mathrm{GHz}$)')
+    ax_r.set_ylim(0, 1.15)
+    ax_r.set_xlim(-0.5, 7.5)
+    ax_r.legend(loc='upper right', fontsize=7.2)
     ax_r.grid(True, axis='y', ls=':', alpha=0.40)
 
-    # Regime highlight on budget bars
-    for i, col in enumerate([GRAY, GREEN, PURPLE]):
-        ax_r.add_patch(Rectangle((i-0.28, 1.02), 0.56, 0.025,
-                                  color=col, clip_on=False, alpha=0.5,
-                                  transform=ax_r.transData))
+    # Add a visual separator line between ρ=0 and ρ=1 sections
+    ax_r.axvline(3.5, color='0.7', lw=1.2, ls='--', alpha=0.6)
 
-    """
-    fig.suptitle(r'Step 2 — Increasing $P_{\max}$: '
-                 r'thermal $\to$ shot $\to$ computation-limited',
-                 fontsize=10.5, y=1.02)
-    """
     fig.tight_layout(pad=1.5, w_pad=2.5)
     if save:
         outpath1 = os.path.join(OUTPUT_DIR, "fig_step2_power_sweep.pdf")
@@ -437,9 +468,9 @@ def fig_step2_power_sweep(dev=DEV_DISPLAY, save=True):
     return fig
 
 
-# ═══════════════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════════[...]
 #  STEP 3 — Incoherent averaging in the computation-limited regime
-# ═══════════════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════════[...]
 
 def fig_step3_averaging(dev=DEV_DISPLAY, save=True):
     """
@@ -528,12 +559,6 @@ def fig_step3_averaging(dev=DEV_DISPLAY, save=True):
     ax.text(0.50, floor_val * 1.35, r'$C_{\rm coh}$ floor (N-independent)',
             ha='center', fontsize=8.0, color='k')
 
-    """
-    ax.text(0.50, floor_val * 2,
-            'Averaging benefit absent:\nall $N$ curves converge',
-            ha='center', fontsize=8, color='0.45', style='italic')
-    """
-
     _add_enob_axis(ax)
 
     ax.set_xlabel(r'Data sparsity index $\eta$')
@@ -564,12 +589,6 @@ def fig_step3_averaging(dev=DEV_DISPLAY, save=True):
     y_conv = sigma_per_B(1.0, 0.0)    # same for all ρ (see Remark in paper)
     ax.axhline(y_conv, color='k', lw=0.9, ls=':', alpha=0.55)
 
-    """
-    ax.text(0.05, y_conv * 0,
-            r'Convergence at $\eta=1$:' + '\n'
-            r'$C_\eta+C_{\rm coh}=\mathrm{RIN+ERIN}$ ($\rho$-independent)',
-            fontsize=7.5, color='0.30', ha='left')
-    """
     # Dense-limit vertical guide
     ax.axvline(eta_min_c, color='0.5', lw=0.9, ls='--', alpha=0.5)
     ax.text(eta_min_c + 0.015, sigma_per_B(eta_min_c, 0.5)*0.35,
@@ -617,15 +636,6 @@ def fig_step3_averaging(dev=DEV_DISPLAY, save=True):
     for ax in axes:
         ax.set_ylim(y_lo, y_hi)
 
-    """
-    fig.suptitle(
-        r'Step 3 — In the computation-limited regime: '
-        r'joint $(\rho,\,\eta)$ incoherent averaging mechanism'
-        '\n'
-        rf'($P_{{\max}}={P_high*1e3:.1f}\,\mathrm{{mW}}$, '
-        rf'$B=1\,\mathrm{{GHz}}$)',
-        fontsize=10, y=1.02)
-    """
     fig.tight_layout(pad=1.5, w_pad=2.0)
     if save:
         outpath1 = os.path.join(OUTPUT_DIR, "fig_step3_averaging.pdf")
@@ -636,9 +646,9 @@ def fig_step3_averaging(dev=DEV_DISPLAY, save=True):
     return fig
 
 
-# ═══════════════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════════[...]
 #  Helper: secondary ENOB axis
-# ═══════════════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════════[...]
 
 def _add_enob_axis(ax):
     """
@@ -665,9 +675,9 @@ def _add_enob_axis(ax):
     ax2.set_ylabel(r'ENOB ($k=1$) [bits]', fontsize=8.5)
 
 
-# ═══════════════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════════[...]
 #  Supplemental: parameter summary printout
-# ═══════════════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════════[...]
 
 def print_regime_parameters(dev=DEV_DISPLAY):
     """Print analytical crossover powers for verification."""
@@ -684,9 +694,9 @@ def print_regime_parameters(dev=DEV_DISPLAY):
     print()
 
 
-# ═══════════════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════════[...]
 #  Entry point
-# ═══════════════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════════════[...]
 
 if __name__ == '__main__':
     outpath1 = os.path.join(OUTPUT_DIR, "fig_scaling_law_main.pdf")
