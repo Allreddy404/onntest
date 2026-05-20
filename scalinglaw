@@ -28,12 +28,14 @@ three-step narrative flow:
 
 import numpy as np
 import matplotlib
+
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 from matplotlib.patches import FancyArrowPatch, Rectangle
 from matplotlib.lines import Line2D
 import warnings
+
 warnings.filterwarnings('ignore')
 
 import os
@@ -46,8 +48,9 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 # ══════════════════════════════════════════════════════════════════[...]
 #  Physical constants
 # ══════════════════════════════════════════════════════════════════[...]
-q   = 1.602e-19   # C
-kB  = 1.381e-23   # J/K
+q = 1.602e-19  # C
+kB = 1.381e-23  # J/K
+
 
 # ══════════════════════════════════════════════════════════════════[...]
 #  Device parameter sets
@@ -65,16 +68,18 @@ kB  = 1.381e-23   # J/K
 def make_dev(RIN_dBc=-150, ERIN_dBc=-150, R_resp=0.95,
              R_L=200.0, I_d=30e-9, T=300.0):
     return dict(
-        RIN    = 10**(RIN_dBc  / 10),
-        ERIN   = 10**(ERIN_dBc / 10),
-        R_resp = R_resp,
-        R_L    = R_L,
-        I_d    = I_d,
-        T      = T,
+        RIN=10 ** (RIN_dBc / 10),
+        ERIN=10 ** (ERIN_dBc / 10),
+        R_resp=R_resp,
+        R_L=R_L,
+        I_d=I_d,
+        T=T,
     )
 
-DEV_DISPLAY = make_dev(R_L=200.0)   # all three regimes visible
-DEV_HSPD    = make_dev(R_L=50.0)    # high-speed TIA
+
+DEV_DISPLAY = make_dev(R_L=200.0)  # all three regimes visible
+DEV_HSPD = make_dev(R_L=50.0)  # high-speed TIA
+
 
 # ══════════════════════════════════════════════════════════════════[...]
 #  Core model
@@ -83,16 +88,16 @@ DEV_HSPD    = make_dev(R_L=50.0)    # high-speed TIA
 def coeffs(rho, P_max, dev):
     """Return (C_eta, C_coh, C_shot, C_bg) in Hz⁻¹."""
     R, D = dev['R_resp'], dev
-    C_eta  = (1.0 - rho) * D['RIN'] + D['ERIN']
-    C_coh  = rho * D['RIN']
+    C_eta = (1.0 - rho) * D['RIN'] + D['ERIN']
+    C_coh = rho * D['RIN']
     C_shot = 2.0 * q / (R * P_max)
-    C_bg   = (4.0*kB*D['T']/D['R_L'] + 2.0*q*D['I_d']) / (R * P_max)**2
+    C_bg = (4.0 * kB * D['T'] / D['R_L'] + 2.0 * q * D['I_d']) / (R * P_max) ** 2
     return C_eta, C_coh, C_shot, C_bg
 
 
 def sigma_sq(eta, rho, B, P_max, dev):
     Ce, Cc, Cs, Cb = coeffs(rho, P_max, dev)
-    return (Ce*eta + Cc + Cs + Cb) * B
+    return (Ce * eta + Cc + Cs + Cb) * B
 
 
 def crossover_powers(rho, eta, dev):
@@ -103,52 +108,53 @@ def crossover_powers(rho, eta, dev):
     P_sh_comp: shot → computation crossover (C_shot = C_eta*eta + C_coh)
     """
     R = dev['R_resp']
-    thermal_psd = 4.0*kB*dev['T']/dev['R_L'] + 2.0*q*dev['I_d']
-    P_th_sh   = thermal_psd / (2.0 * q * R)
-    C_comp    = (1.0 - rho)*dev['RIN']*eta + dev['ERIN']*eta + rho*dev['RIN']
+    thermal_psd = 4.0 * kB * dev['T'] / dev['R_L'] + 2.0 * q * dev['I_d']
+    P_th_sh = thermal_psd / (2.0 * q * R)
+    C_comp = (1.0 - rho) * dev['RIN'] * eta + dev['ERIN'] * eta + rho * dev['RIN']
     P_sh_comp = 2.0 * q / (R * C_comp)
     return P_th_sh, P_sh_comp
+
 
 # ══════════════════════════════════════════════════════════════════[...]
 #  Global plot style
 # ══════════════════════════════════════════════════════════════════[...]
 
 plt.rcParams.update({
-    'font.family'         : 'serif',
-    'font.serif'          : ['Times New Roman', 'DejaVu Serif'],
-    'mathtext.fontset'    : 'stix',
-    'font.size'           : 9,
-    'axes.labelsize'      : 10,
-    'axes.titlesize'      : 9.5,
-    'xtick.labelsize'     : 8.5,
-    'ytick.labelsize'     : 8.5,
-    'legend.fontsize'     : 8,
-    'legend.framealpha'   : 0.9,
-    'legend.edgecolor'    : '0.7',
-    'lines.linewidth'     : 1.6,
-    'axes.linewidth'      : 0.8,
-    'xtick.major.width'   : 0.8,
-    'ytick.major.width'   : 0.8,
-    'xtick.minor.visible' : True,
-    'ytick.minor.visible' : True,
-    'xtick.minor.width'   : 0.5,
-    'ytick.minor.width'   : 0.5,
-    'figure.dpi'          : 150,
-    'savefig.dpi'         : 300,
-    'savefig.bbox'        : 'tight',
-    'savefig.pad_inches'  : 0.06,
+    'font.family': 'serif',
+    'font.serif': ['Times New Roman', 'DejaVu Serif'],
+    'mathtext.fontset': 'stix',
+    'font.size': 9,
+    'axes.labelsize': 10,
+    'axes.titlesize': 9.5,
+    'xtick.labelsize': 8.5,
+    'ytick.labelsize': 8.5,
+    'legend.fontsize': 8,
+    'legend.framealpha': 0.9,
+    'legend.edgecolor': '0.7',
+    'lines.linewidth': 1.6,
+    'axes.linewidth': 0.8,
+    'xtick.major.width': 0.8,
+    'ytick.major.width': 0.8,
+    'xtick.minor.visible': True,
+    'ytick.minor.visible': True,
+    'xtick.minor.width': 0.5,
+    'ytick.minor.width': 0.5,
+    'figure.dpi': 150,
+    'savefig.dpi': 300,
+    'savefig.bbox': 'tight',
+    'savefig.pad_inches': 0.06,
 })
 
 # Color palette (color-blind safe)
-BLUE   = '#1f77b4'
-RED    = '#d62728'
+BLUE = '#1f77b4'
+RED = '#d62728'
 ORANGE = '#ff7f0e'
-GREEN  = '#2ca02c'
+GREEN = '#2ca02c'
 PURPLE = '#9467bd'
-BROWN  = '#8c564b'
-PINK   = '#e377c2'
-GRAY   = '#7f7f7f'
-CYAN   = '#17becf'
+BROWN = '#8c564b'
+PINK = '#e377c2'
+GRAY = '#7f7f7f'
+CYAN = '#17becf'
 
 # N-series colors (light → dark as N grows)
 N_COLORS = [CYAN, BLUE, PURPLE, RED]
@@ -172,17 +178,17 @@ def fig_step1_bandwidth_scaling(dev=DEV_DISPLAY, save=True):
                  showing every term scales identically with B.
     """
     B_arr = np.logspace(4, 12, 800)
-    eta0  = 0.20
+    eta0 = 0.20
 
     # ── scenarios for left panel ──
     scenarios_L = [
-        dict(rho=0.0, P_max=1e-3,   col=BLUE,   ls='-',
+        dict(rho=0.0, P_max=1e-3, col=BLUE, ls='-',
              lbl=r'$\rho=0$,  $P_{\max}=1\,\mathrm{mW}$'),
-        dict(rho=1.0, P_max=1e-3,   col=RED,    ls='-',
+        dict(rho=1.0, P_max=1e-3, col=RED, ls='-',
              lbl=r'$\rho=1$,  $P_{\max}=1\,\mathrm{mW}$'),
-        dict(rho=0.0, P_max=1e-2, col=BLUE,   ls='--',
+        dict(rho=0.0, P_max=1e-2, col=BLUE, ls='--',
              lbl=r'$\rho=0$,  $P_{\max}=10\,\mathrm{mW}$'),
-        dict(rho=1.0, P_max=1e-2, col=RED,    ls='--',
+        dict(rho=1.0, P_max=1e-2, col=RED, ls='--',
              lbl=r'$\rho=1$,  $P_{\max}=10\,\mathrm{mW}$'),
     ]
 
@@ -201,8 +207,8 @@ def fig_step1_bandwidth_scaling(dev=DEV_DISPLAY, save=True):
 
     # Slope annotation with bracket
     ax_l.annotate('',
-        xy=(3e10, 3e-2), xytext=(3e9, 3e-3),
-        arrowprops=dict(arrowstyle='->', color='k', lw=0.9))
+                  xy=(3e10, 3e-2), xytext=(3e9, 3e-3),
+                  arrowprops=dict(arrowstyle='->', color='k', lw=0.9))
     ax_l.text(5.5e9, 6e-3, r'slope $=1$', fontsize=8.5, rotation=43)
 
     ax_l.set_xlabel(r'Operational bandwidth $B$ (Hz)')
@@ -215,14 +221,14 @@ def fig_step1_bandwidth_scaling(dev=DEV_DISPLAY, save=True):
     ax_l.grid(True, which='minor', ls=':', alpha=0.15)
 
     # ─── Right panel: component breakdown at P=1 mW, ρ=0 ───
-    P_fix  = 1e-3
+    P_fix = 1e-3
     rho_fix = 0.0
     Ce, Cc, Cs, Cb = coeffs(rho_fix, P_fix, dev)
 
     components = [
-        (Ce*eta0 * B_arr, PURPLE, '-',  r'$C_\eta\eta\cdot B$ (computation)'),
-        (Cb      * B_arr, GRAY,   '--', r'$C_{\rm bg}\cdot B$ (thermal)'),
-        (Cs      * B_arr, GREEN,  '--', r'$C_{\rm shot}\cdot B$ (shot)'),
+        (Ce * eta0 * B_arr, PURPLE, '-', r'$C_\eta\eta\cdot B$ (computation)'),
+        (Cb * B_arr, GRAY, '--', r'$C_{\rm bg}\cdot B$ (thermal)'),
+        (Cs * B_arr, GREEN, '--', r'$C_{\rm shot}\cdot B$ (shot)'),
         (sigma_sq(eta0, rho_fix, B_arr, P_fix, dev), 'k', '-',
          r'Total $\sigma^2_{\rm norm}$'),
     ]
@@ -272,68 +278,68 @@ def fig_step2_power_sweep(dev=DEV_DISPLAY, save=True):
                  (one per regime), showing comparison between ρ=0 and ρ=1.
                  Total 6 columns: 3 for ρ=0, 3 for ρ=1.
     """
-    B0   = 1e9       # 1 GHz reference
+    B0 = 1e9  # 1 GHz reference
     eta0 = 0.20
-    P_arr = np.logspace(-4, 4, 800) * 1e-3   # 10 nW → 10 mW
+    P_arr = np.logspace(-4, 4, 800) * 1e-3  # 10 nW → 10 mW
 
     # Analytical crossover powers
-    P_th_sh_0,  P_sh_comp_0  = crossover_powers(0.0, eta0, dev)
-    P_th_sh_1,  P_sh_comp_1  = crossover_powers(1.0, eta0, dev)
+    P_th_sh_0, P_sh_comp_0 = crossover_powers(0.0, eta0, dev)
+    P_th_sh_1, P_sh_comp_1 = crossover_powers(1.0, eta0, dev)
 
     fig, (ax_l, ax_r) = plt.subplots(1, 2, figsize=(10.0, 4.4))
 
     # ─── Left panel: σ² vs P_max ───
     for rho, col, lbl in [(0.0, BLUE, r'$\rho=0$ (independent sources)'),
-                          (1.0, RED,  r'$\rho=1$ (shared source)')]:
+                          (1.0, RED, r'$\rho=1$ (shared source)')]:
         y = np.array([sigma_sq(eta0, rho, B0, P, dev) for P in P_arr])
-        ax_l.loglog(P_arr*1e3, y, color=col, lw=1.8, label=lbl)
+        ax_l.loglog(P_arr * 1e3, y, color=col, lw=1.8, label=lbl)
 
     # Individual noise components for ρ=0 (dashed)
     comp_lines = []
     for P in P_arr:
         Ce, Cc, Cs, Cb = coeffs(0.0, P, dev)
-        comp_lines.append((Ce*eta0*B0, Cb*B0, Cs*B0))
+        comp_lines.append((Ce * eta0 * B0, Cb * B0, Cs * B0))
     comp_lines = np.array(comp_lines)
     P_mW = P_arr * 1e3
-    ax_l.loglog(P_mW, comp_lines[:,2], color=GREEN,  lw=0.9, ls=':',
+    ax_l.loglog(P_mW, comp_lines[:, 2], color=GREEN, lw=0.9, ls=':',
                 label=r'$C_{\rm shot}\cdot B$')
-    ax_l.loglog(P_mW, comp_lines[:,1], color=GRAY,   lw=0.9, ls=':',
+    ax_l.loglog(P_mW, comp_lines[:, 1], color=GRAY, lw=0.9, ls=':',
                 label=r'$C_{\rm bg}\cdot B$')
-    ax_l.loglog(P_mW, comp_lines[:,0], color=PURPLE, lw=0.9, ls=':',
+    ax_l.loglog(P_mW, comp_lines[:, 0], color=PURPLE, lw=0.9, ls=':',
                 label=r'$C_\eta\eta\cdot B$')
 
     # Regime shading (background)
     ylo, yhi = 5e-16, 1.0
     ax_l.set_ylim(ylo, yhi)
-    P_lo, P_hi = P_arr[0]*1e3, P_arr[-1]*1e3
+    P_lo, P_hi = P_arr[0] * 1e3, P_arr[-1] * 1e3
 
-    ax_l.axvspan(P_lo,              P_th_sh_0*1e3, alpha=0.06,
-                 color=GRAY,   zorder=0, label='_')
-    ax_l.axvspan(P_th_sh_0*1e3,    P_sh_comp_0*1e3, alpha=0.06,
-                 color=GREEN,  zorder=0, label='_')
-    ax_l.axvspan(P_sh_comp_0*1e3,  P_hi,          alpha=0.06,
+    ax_l.axvspan(P_lo, P_th_sh_0 * 1e3, alpha=0.06,
+                 color=GRAY, zorder=0, label='_')
+    ax_l.axvspan(P_th_sh_0 * 1e3, P_sh_comp_0 * 1e3, alpha=0.06,
+                 color=GREEN, zorder=0, label='_')
+    ax_l.axvspan(P_sh_comp_0 * 1e3, P_hi, alpha=0.06,
                  color=PURPLE, zorder=0, label='_')
 
     # Crossover vertical lines
     for P_x, col, lbl in [
-        (P_th_sh_0,   GRAY,   r'$P^*_{\rm th{\to}sh}$'),
+        (P_th_sh_0, GRAY, r'$P^*_{\rm th{\to}sh}$'),
         (P_sh_comp_0, PURPLE, r'$P^*_{\rm sh{\to}comp}$'),
     ]:
-        ax_l.axvline(P_x*1e3, color=col, lw=1.0, ls='--', alpha=0.7)
-        ax_l.text(P_x*1e3*1.18, ylo*8, lbl, fontsize=8,
+        ax_l.axvline(P_x * 1e3, color=col, lw=1.0, ls='--', alpha=0.7)
+        ax_l.text(P_x * 1e3 * 1.18, ylo * 8, lbl, fontsize=8,
                   color=col, ha='left', rotation=90, va='bottom')
 
     # Slope annotation arrows + labels
     def slope_arrow(ax, P1, P2, y1, y2, txt, col, rot):
         ax.annotate('', xy=(P2, y2), xytext=(P1, y1),
                     arrowprops=dict(arrowstyle='->', color=col, lw=0.9))
-        ax.text((P1*P2)**0.5, (y1*y2)**0.5 * 1.8, txt,
+        ax.text((P1 * P2) ** 0.5, (y1 * y2) ** 0.5 * 1.8, txt,
                 fontsize=8, color=col, rotation=rot, ha='center')
 
     slope_arrow(ax_l, 0.015, 0.04, 1e-10, 1e-12,
-                r'slope $= -2$', GRAY,   -55)
-    slope_arrow(ax_l, 0.12,  0.4,  5e-10, 5e-11,
-                r'slope $= -1$', GREEN,  -25)
+                r'slope $= -2$', GRAY, -55)
+    slope_arrow(ax_l, 0.12, 0.4, 5e-10, 5e-11,
+                r'slope $= -1$', GREEN, -25)
 
     # Flat / saturation annotation
     ax_l.text(3.0, 2e-8, r'slope $= 0$' + '\n' + r'(saturated)',
@@ -350,16 +356,16 @@ def fig_step2_power_sweep(dev=DEV_DISPLAY, save=True):
     # ─── Right panel: noise budget at three operating points ───
     # Compute for ρ=0: three representative powers
     P_ops_W_rho0 = np.array([
-        P_th_sh_0  / 6.0,              # deep thermal regime
-        (P_th_sh_0 * P_sh_comp_0)**0.5, # geometric mean → shot regime
-        P_sh_comp_0 * 6.0,              # deep computation regime
+        P_th_sh_0 / 6.0,  # deep thermal regime
+        (P_th_sh_0 * P_sh_comp_0) ** 0.5,  # geometric mean → shot regime
+        P_sh_comp_0 * 6.0,  # deep computation regime
     ])
-    
+
     # Compute for ρ=1: three representative powers based on ρ=1 crossovers
     P_ops_W_rho1 = np.array([
-        P_th_sh_1  / 6.0,              # deep thermal regime
-        (P_th_sh_1 * P_sh_comp_1)**0.5, # geometric mean → shot regime
-        P_sh_comp_1 * 6.0,              # deep computation regime
+        P_th_sh_1 / 6.0,  # deep thermal regime
+        (P_th_sh_1 * P_sh_comp_1) ** 0.5,  # geometric mean → shot regime
+        P_sh_comp_1 * 6.0,  # deep computation regime
     ])
 
     labels_op = [
@@ -372,20 +378,20 @@ def fig_step2_power_sweep(dev=DEV_DISPLAY, save=True):
     frac_bg_r0, frac_shot_r0, frac_eta_r0, frac_coh_r0 = [], [], [], []
     for P in P_ops_W_rho0:
         Ce, Cc, Cs, Cb = coeffs(0.0, P, dev)
-        tot = (Ce*eta0 + Cc + Cs + Cb)
+        tot = (Ce * eta0 + Cc + Cs + Cb)
         frac_bg_r0.append(Cb / tot)
         frac_shot_r0.append(Cs / tot)
-        frac_eta_r0.append(Ce*eta0 / tot)
+        frac_eta_r0.append(Ce * eta0 / tot)
         frac_coh_r0.append(Cc / tot)
 
     # Compute noise fractions for ρ=1
     frac_bg_r1, frac_shot_r1, frac_eta_r1, frac_coh_r1 = [], [], [], []
     for P in P_ops_W_rho1:
         Ce, Cc, Cs, Cb = coeffs(1.0, P, dev)
-        tot = (Ce*eta0 + Cc + Cs + Cb)
+        tot = (Ce * eta0 + Cc + Cs + Cb)
         frac_bg_r1.append(Cb / tot)
         frac_shot_r1.append(Cs / tot)
-        frac_eta_r1.append(Ce*eta0 / tot)
+        frac_eta_r1.append(Ce * eta0 / tot)
         frac_coh_r1.append(Cc / tot)
 
     # Create bar positions: 3 for ρ=0, 1.5 gap, 3 for ρ=1
@@ -398,10 +404,10 @@ def fig_step2_power_sweep(dev=DEV_DISPLAY, save=True):
     btm_r1 = np.zeros(3)
 
     budget_items = [
-        (np.array(frac_bg_r0),   np.array(frac_bg_r1),   GRAY,   r'$C_{\rm bg}\cdot B$ (thermal)'),
-        (np.array(frac_shot_r0), np.array(frac_shot_r1), GREEN,  r'$C_{\rm shot}\cdot B$ (shot)'),
-        (np.array(frac_eta_r0),  np.array(frac_eta_r1),  PURPLE, r'$C_\eta\eta\cdot B$ (computation)'),
-        (np.array(frac_coh_r0),  np.array(frac_coh_r1),  RED,    r'$C_{\rm coh}\cdot B$ (coherent)'),
+        (np.array(frac_bg_r0), np.array(frac_bg_r1), GRAY, r'$C_{\rm bg}\cdot B$ (thermal)'),
+        (np.array(frac_shot_r0), np.array(frac_shot_r1), GREEN, r'$C_{\rm shot}\cdot B$ (shot)'),
+        (np.array(frac_eta_r0), np.array(frac_eta_r1), PURPLE, r'$C_\eta\eta\cdot B$ (computation)'),
+        (np.array(frac_coh_r0), np.array(frac_coh_r1), RED, r'$C_{\rm coh}\cdot B$ (coherent)'),
     ]
 
     for vals_r0, vals_r1, col, lbl in budget_items:
@@ -414,21 +420,21 @@ def fig_step2_power_sweep(dev=DEV_DISPLAY, save=True):
 
     # X-axis labels
     xticklabels = []
-    
+
     # Labels for ρ=0
     for i, (P, lbl) in enumerate(zip(P_ops_W_rho0, labels_op)):
         P_mW_val = P * 1e3
         if P_mW_val < 0.01:
-            p_str = f'{P_mW_val*1e3:.1f} μW'
+            p_str = f'{P_mW_val * 1e3:.1f} μW'
         else:
             p_str = f'{P_mW_val:.3f} mW'
         xticklabels.append(f'{lbl}\n({p_str})')
-    
+
     # Labels for ρ=1
     for i, (P, lbl) in enumerate(zip(P_ops_W_rho1, labels_op)):
         P_mW_val = P * 1e3
         if P_mW_val < 0.01:
-            p_str = f'{P_mW_val*1e3:.1f} μW'
+            p_str = f'{P_mW_val * 1e3:.1f} μW'
         else:
             p_str = f'{P_mW_val:.3f} mW'
         xticklabels.append(f'{lbl}\n({p_str})')
@@ -438,7 +444,7 @@ def fig_step2_power_sweep(dev=DEV_DISPLAY, save=True):
     ax_r.set_xticklabels(xticklabels, fontsize=7.0)
 
     ax_r.yaxis.set_major_formatter(
-        mticker.FuncFormatter(lambda v, _: f'{v*100:.0f}%'))
+        mticker.FuncFormatter(lambda v, _: f'{v * 100:.0f}%'))
     ax_r.set_ylabel(r'Fraction of total $\sigma^2_{\rm norm}$')
     ax_r.set_title(r'(b) Noise budget: $\rho$-dependence ($B=1\,\mathrm{GHz}$)')
     ax_r.set_ylim(0, 1.15)
@@ -450,9 +456,9 @@ def fig_step2_power_sweep(dev=DEV_DISPLAY, save=True):
     ax_r.axvline(2.75, color='0.7', lw=1.2, ls='--', alpha=0.6)
 
     # Add text annotations below the figure (outside axis)
-    fig.text(0.27, 0.02, r'$\rho=0$ (independent sources)', 
+    fig.text(0.68, 0.08, r'$\rho=0$ (independent sources)',
              ha='center', fontsize=8.5, color=BLUE, fontweight='bold')
-    fig.text(0.73, 0.02, r'$\rho=1$ (shared source)', 
+    fig.text(0.88, 0.08, r'$\rho=1$ (shared source)',
              ha='center', fontsize=8.5, color=RED, fontweight='bold')
 
     fig.tight_layout(rect=[0, 0.05, 1, 1])
@@ -484,10 +490,10 @@ def fig_step3_averaging(dev=DEV_DISPLAY, save=True):
     """
     # Choose P_high well above both crossovers
     _, P_sh_comp = crossover_powers(0.0, 0.20, dev)
-    P_high = P_sh_comp * 8.0      # 8× above computation crossover
-    B_ref  = 1e9                  # reference; y-axis is σ²/B = coeff sum
+    P_high = P_sh_comp * 8.0  # 8× above computation crossover
+    B_ref = 1e9  # reference; y-axis is σ²/B = coeff sum
 
-    N_vals   = [4, 16, 64, 256]
+    N_vals = [4, 16, 64, 256]
     rho_vals = [0.0, 0.25, 0.5, 1.0]
 
     eta_dense = np.linspace(0.001, 1.0, 1200)
@@ -495,7 +501,7 @@ def fig_step3_averaging(dev=DEV_DISPLAY, save=True):
     def sigma_per_B(eta, rho, P=P_high):
         """σ²_norm / B = sum of four coefficients × eta."""
         Ce, Cc, Cs, Cb = coeffs(rho, P, dev)
-        return Ce*eta + Cc + Cs + Cb
+        return Ce * eta + Cc + Cs + Cb
 
     fig, axes = plt.subplots(1, 3, figsize=(12.0, 4.2))
 
@@ -508,7 +514,7 @@ def fig_step3_averaging(dev=DEV_DISPLAY, save=True):
     ax = axes[0]
     for N, col in zip(N_vals, N_COLORS):
         eta_min = 1.0 / N
-        mask    = eta_dense >= eta_min - 1e-4
+        mask = eta_dense >= eta_min - 1e-4
         y = sigma_per_B(eta_dense[mask], 0.0)
         ax.semilogy(eta_dense[mask], y, color=col, lw=1.7, label=f'$N={N}$')
         # Mark dense-limit point
@@ -520,8 +526,8 @@ def fig_step3_averaging(dev=DEV_DISPLAY, save=True):
     # Annotate: averaging benefit
     ax.annotate(
         r'Dense limit $\eta=N^{-1}$:' + '\n' + r'$\sigma^2\propto N^{-1}$',
-        xy=(1/16, sigma_per_B(1/16, 0.0)),
-        xytext=(0.12, sigma_per_B(1/16, 0.0)*0.15),
+        xy=(1 / 16, sigma_per_B(1 / 16, 0.0)),
+        xytext=(0.12, sigma_per_B(1 / 16, 0.0) * 0.15),
         fontsize=7.5,
         arrowprops=dict(arrowstyle='->', lw=0.8, color='0.4'),
         ha='left')
@@ -538,12 +544,12 @@ def fig_step3_averaging(dev=DEV_DISPLAY, save=True):
 
     # ── Panel (b): ρ=1, varying N ──
     ax = axes[1]
-    C_coh_val = dev['RIN']   # = ρ·RIN at ρ=1
-    floor_val = sigma_per_B(0.0, 1.0)   # η→0 limit (= C_coh+C_shot+C_bg)
+    C_coh_val = dev['RIN']  # = ρ·RIN at ρ=1
+    floor_val = sigma_per_B(0.0, 1.0)  # η→0 limit (= C_coh+C_shot+C_bg)
 
     for N, col in zip(N_vals, N_COLORS):
         eta_min = 1.0 / N
-        mask    = eta_dense >= eta_min - 1e-4
+        mask = eta_dense >= eta_min - 1e-4
         y = sigma_per_B(eta_dense[mask], 1.0)
         ax.semilogy(eta_dense[mask], y, color=col, lw=1.7, label=f'$N={N}$')
         y0 = sigma_per_B(eta_min, 1.0)
@@ -567,9 +573,9 @@ def fig_step3_averaging(dev=DEV_DISPLAY, save=True):
 
     # ── Panel (c): N=64, varying ρ ──
     ax = axes[2]
-    N_c     = 64
+    N_c = 64
     eta_min_c = 1.0 / N_c
-    mask_c  = eta_dense >= eta_min_c - 1e-4
+    mask_c = eta_dense >= eta_min_c - 1e-4
 
     for rho_c, col in zip(rho_vals, RHO_COLORS):
         y = sigma_per_B(eta_dense[mask_c], rho_c)
@@ -583,12 +589,12 @@ def fig_step3_averaging(dev=DEV_DISPLAY, save=True):
                 markeredgecolor='white', markeredgewidth=0.5)
 
     # Convergence at η=1: all curves meet at RIN+ERIN+...
-    y_conv = sigma_per_B(1.0, 0.0)    # same for all ρ (see Remark in paper)
+    y_conv = sigma_per_B(1.0, 0.0)  # same for all ρ (see Remark in paper)
     ax.axhline(y_conv, color='k', lw=0.9, ls=':', alpha=0.55)
 
     # Dense-limit vertical guide
     ax.axvline(eta_min_c, color='0.5', lw=0.9, ls='--', alpha=0.5)
-    ax.text(eta_min_c + 0.015, sigma_per_B(eta_min_c, 0.5)*0.35,
+    ax.text(eta_min_c + 0.015, sigma_per_B(eta_min_c, 0.5) * 0.35,
             r'$\eta_{\min}=N^{-1}$', fontsize=8, color='0.45',
             ha='left', rotation=90)
 
@@ -597,12 +603,12 @@ def fig_step3_averaging(dev=DEV_DISPLAY, save=True):
     y_rho1 = sigma_per_B(eta_min_c, 1.0)
     delta_enob = 0.5 * np.log2(y_rho1 / y_rho0)
     ax.annotate('',
-        xy=(eta_min_c - 0.005, y_rho0),
-        xytext=(eta_min_c - 0.005, y_rho1),
-        arrowprops=dict(arrowstyle='<->', color=ORANGE,
-                        lw=1.1, mutation_scale=10))
+                xy=(eta_min_c - 0.005, y_rho0),
+                xytext=(eta_min_c - 0.005, y_rho1),
+                arrowprops=dict(arrowstyle='<->', color=ORANGE,
+                                lw=1.1, mutation_scale=10))
     ax.text(eta_min_c - 0.055,
-            (y_rho0 * y_rho1)**0.5,
+            (y_rho0 * y_rho1) ** 0.5,
             f'$\\Delta$ENOB\n'
             rf'$={delta_enob:.1f}$ bits'
             '\n'
@@ -623,9 +629,9 @@ def fig_step3_averaging(dev=DEV_DISPLAY, save=True):
     all_y = []
     for rho in [0.0, 1.0]:
         for N in N_vals:
-            eta_m = 1.0/N
+            eta_m = 1.0 / N
             all_y.append(sigma_per_B(eta_m, rho))
-            all_y.append(sigma_per_B(1.0,  rho))
+            all_y.append(sigma_per_B(1.0, rho))
     for rho in rho_vals:
         all_y.append(sigma_per_B(eta_min_c, rho))
     y_lo = min(all_y) / 2.5
@@ -663,7 +669,7 @@ def _add_enob_axis(ax):
     # Choose representative ENOB tick values
     enob_ticks = np.array([4, 6, 8, 10, 12, 14])
     # σ² = 2^{-2·ENOB}  (at k=1, B=1 Hz → σ²/B = σ²_coeff)
-    sigma_for_enob = 2.0**(-2.0 * enob_ticks)
+    sigma_for_enob = 2.0 ** (-2.0 * enob_ticks)
 
     # Only show ticks within current y range
     mask = (sigma_for_enob >= ylo) & (sigma_for_enob <= yhi)
@@ -682,12 +688,12 @@ def print_regime_parameters(dev=DEV_DISPLAY):
     for rho, eta in [(0.0, 0.20), (1.0, 0.20), (0.0, 1.0)]:
         P1, P2 = crossover_powers(rho, eta, dev)
         print(f'  ρ={rho}, η={eta}:  '
-              f'P*(th→sh) = {P1*1e3:.3f} mW,  '
-              f'P*(sh→comp) = {P2*1e3:.3f} mW  '
+              f'P*(th→sh) = {P1 * 1e3:.3f} mW,  '
+              f'P*(sh→comp) = {P2 * 1e3:.3f} mW  '
               f'{"[shot regime EXISTS]" if P1 < P2 else "[shot regime ABSENT]"}')
     print()
     _, P_sc = crossover_powers(0.0, 0.20, dev)
-    print(f'  P_high (Step 3) = {P_sc*8*1e3:.2f} mW  (8× above computation threshold)')
+    print(f'  P_high (Step 3) = {P_sc * 8 * 1e3:.2f} mW  (8× above computation threshold)')
     print()
 
 
